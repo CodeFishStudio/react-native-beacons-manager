@@ -1,5 +1,3 @@
-import { NativeEventEmitter } from 'react-native';
-
 declare module 'react-native-beacons-manager' {
 
   export interface BeaconRegion {
@@ -40,20 +38,6 @@ declare module 'react-native-beacons-manager' {
     shouldDropEmptyRanges(
       drop: boolean
     ): void;
-
-    allowsBackgroundLocationUpdates(
-      allow: boolean
-    ): void;
-
-    setNotificationContent(notificationContent: string): void;
-
-    setRequestToken(token: string): void;
-
-    setNotificationRequestApi(notificationRequestApi: string): void;
-
-    setNotificationTitle(notificationTitle: string): void;
-
-    setBeaconSendPeriod(beaconSendPeriod: number): void;
 
     ///////////////////////////////////////////////////////
     // android only
@@ -161,18 +145,6 @@ declare module 'react-native-beacons-manager' {
         uuid?: string
       }
     ): Promise<any>;
-
-    requestStateForRegion(
-      region: BeaconRegion
-    ): void;
-
-    BeaconsEventEmitter: NativeEventEmitter;
-
-    setDebugApi(debugApi: string): void;
-
-    setBeaconRequestApi(requestApi: string): void;
-
-    isStarted(): boolean;
   }
 
   const beacons: Beacons;
