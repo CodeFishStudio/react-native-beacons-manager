@@ -37,7 +37,9 @@ static NSString *const kEddystoneRegionID = @"EDDY_STONE_REGION_ID";
 
 @end
 
-@implementation RNiBeacon
+@implementation RNiBeacon {
+    bool hasListeners; 
+}
     
 RCT_EXPORT_MODULE()
     
@@ -77,6 +79,14 @@ RCT_EXPORT_MODULE()
         });
         return sharedInstance;
     }
+
+- (void)startObserving {
+    hasListeners = YES;
+}
+
+- (void)stopObserving {
+    hasListeners = NO;
+}
     
 - (NSArray<NSString *> *)supportedEvents
     {
@@ -391,8 +401,11 @@ RCT_EXPORT_METHOD(setNotificationDelay:(int)notificationDelay)
     
 -(void)locationManager:(CLLocationManager *)manager didChangeAuthorizationStatus:(CLAuthorizationStatus)status
     {
-        NSString *statusName = [self nameForAuthorizationStatus:status];
-        [self sendEventWithName:@"authorizationStatusDidChange" body:statusName];
+        if (hasListeners) 
+        {
+            NSString *statusName = [self nameForAuthorizationStatus:status];
+            [self sendEventWithName:@"authorizationStatusDidChange" body:statusName];
+        }
     }
     
 -(void)locationManager:(CLLocationManager *)manager rangingBeaconsDidFailForRegion:(CLBeaconRegion *)region withError:(NSError *)error
@@ -430,7 +443,10 @@ RCT_EXPORT_METHOD(setNotificationDelay:(int)notificationDelay)
                          [self stringForState:state], @"state",
                          nil]];
         
-        [self sendEventWithName:@"didDetermineState" body:event];
+        if (hasListeners) 
+        {
+            [self sendEventWithName:@"didDetermineState" body:event];
+        }
         
         switch (state) {
             case CLRegionStateInside:
@@ -489,7 +505,10 @@ RCT_EXPORT_METHOD(setNotificationDelay:(int)notificationDelay)
             [self sendBeacon:[beaconArray firstObject]];
         }
         
-        [self sendEventWithName:@"beaconsDidRange" body:event];
+        if (hasListeners) 
+        {
+            [self sendEventWithName:@"beaconsDidRange" body:event];
+        }
     }
     
 -(void)locationManager:(CLLocationManager *)manager
@@ -499,7 +518,10 @@ RCT_EXPORT_METHOD(setNotificationDelay:(int)notificationDelay)
                      @"EnterRegion", @"message",
                      nil]];
     
-    [self sendEventWithName:@"regionDidEnter" body:event];
+    if (hasListeners) 
+    {
+        [self sendEventWithName:@"regionDidEnter" body:event];
+    }
 }
     
 -(void)locationManager:(CLLocationManager *)manager
@@ -508,7 +530,10 @@ RCT_EXPORT_METHOD(setNotificationDelay:(int)notificationDelay)
     [self sendDebug:[[NSDictionary alloc] initWithObjectsAndKeys:
                      @"ExitRegion", @"message",
                      nil]];
-    [self sendEventWithName:@"regionDidExit" body:event];
+    if (hasListeners) 
+    {
+        [self sendEventWithName:@"regionDidExit" body:event];
+    }
 }
     
 + (BOOL)requiresMainQueueSetup
@@ -535,7 +560,10 @@ RCT_EXPORT_METHOD(setNotificationDelay:(int)notificationDelay)
                                     },
                             @"beacons": beaconArray
                             };
-    [self sendEventWithName:@"beaconsDidRange" body:event];
+    if (hasListeners) 
+    {
+        [self sendEventWithName:@"beaconsDidRange" body:event];
+    }
 }
     
 - (NSDictionary*)getEddyStoneInfo:(id)beaconInfo {
