@@ -31,6 +31,8 @@ static NSString *const kEddystoneRegionID = @"EDDY_STONE_REGION_ID";
 @property NSString *notiTitle;
 @property NSString *notiContent;
 @property NSDictionary *MyRegion;
+@property NSDictionary *missedBeacon;
+@property NSString *missedBeaconType;
 @property NSString *uid;
 @property int notiDelay;
 @property int sendPeriod;
@@ -61,6 +63,8 @@ RCT_EXPORT_MODULE()
             self.eddyStoneScanner.delegate = self;
             self.MyRegion = nil;
             self.debugApiEndpoint = @"";
+            self.missedBeacon = nil;
+            self.missedBeaconType = @"";
             
         }
         
@@ -370,6 +374,14 @@ RCT_EXPORT_METHOD(setNotificationDelay:(int)notificationDelay)
     sharedInstance.notiDelay = notificationDelay;
 }
 
+RCT_EXPORT_METHOD(getMissedBeacon) {
+    if (self.missedBeacon != nil && hasListeners && self.bridge) {
+        [self sendEventWithName:self.missedBeaconType body: self.missedBeacon]; 
+    }
+    self.missedBeacon = nil;
+    self.missedBeaconType = @"";
+}
+
     
 -(NSString *)nameForAuthorizationStatus:(CLAuthorizationStatus)authorizationStatus
     {
@@ -518,9 +530,12 @@ RCT_EXPORT_METHOD(setNotificationDelay:(int)notificationDelay)
                      @"EnterRegion", @"message",
                      nil]];
     
-    if (hasListeners) 
+    if (hasListeners && self.bridge) 
     {
         [self sendEventWithName:@"regionDidEnter" body:event];
+    } else {
+        self.missedBeacon = event;
+        self.missedBeaconType = @"regionDidEnter";
     }
 }
     
@@ -530,9 +545,12 @@ RCT_EXPORT_METHOD(setNotificationDelay:(int)notificationDelay)
     [self sendDebug:[[NSDictionary alloc] initWithObjectsAndKeys:
                      @"ExitRegion", @"message",
                      nil]];
-    if (hasListeners) 
+    if (hasListeners && self.bridge) 
     {
         [self sendEventWithName:@"regionDidExit" body:event];
+    } else {
+        self.missedBeacon = event;
+        self.missedBeaconType = @"regionDidExit";
     }
 }
     
